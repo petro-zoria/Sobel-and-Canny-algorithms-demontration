@@ -11,7 +11,7 @@ DEVICE  ?= 0
 FORMAT  ?= avfoundation
 WIDTH   ?= 640
 HEIGHT  ?= 480
-FPS     ?= 30
+FPS     ?= 15
 
 all: $(TARGET)
 
@@ -22,16 +22,22 @@ $(TARGET): vision.c
 live-sobel: $(TARGET)
 	ffmpeg -f $(FORMAT) -i "$(DEVICE)" \
 	       -vf scale=$(WIDTH):$(HEIGHT) \
+	       -fflags nobuffer -flags low_delay \
 	       -f image2pipe -vcodec ppm -r $(FPS) - \
 	| ./$(TARGET) sobel \
-	| ffplay -f image2pipe -vcodec pgm -window_title "Vision: Sobel" -
+	| ffplay -f image2pipe -vcodec pgm \
+	         -fflags nobuffer -flags low_delay -framedrop \
+	         -window_title "Vision: Sobel" -
 
 live-canny: $(TARGET)
 	ffmpeg -f $(FORMAT) -i "$(DEVICE)" \
 	       -vf scale=$(WIDTH):$(HEIGHT) \
+	       -fflags nobuffer -flags low_delay \
 	       -f image2pipe -vcodec ppm -r $(FPS) - \
 	| ./$(TARGET) canny \
-	| ffplay -f image2pipe -vcodec pgm -window_title "Vision: Canny" -
+	| ffplay -f image2pipe -vcodec pgm \
+	         -fflags nobuffer -flags low_delay -framedrop \
+	         -window_title "Vision: Canny" -
 
 clean:
 	rm -f $(TARGET)
